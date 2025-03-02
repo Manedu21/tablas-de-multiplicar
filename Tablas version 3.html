@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Campeones - Tablas de Multiplicar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            background-image: url('https://source.unsplash.com/1600x900/?kids,fun'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+        }
+        .correct { color: green; font-weight: bold; }
+        .incorrect { color: red; font-weight: bold; }
+        .timer { font-size: 1.5rem; font-weight: bold; color: darkred; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen text-center p-4">
+    <audio id="bg-music" src="https://www.bensound.com/bensound-music/bensound-ukulele.mp3" loop></audio>
+    <audio id="correct-sound" src="https://www.fesliyanstudios.com/play-mp3/4386" preload="auto"></audio>
+    <audio id="incorrect-sound" src="https://www.fesliyanstudios.com/play-mp3/4387" preload="auto"></audio>
+    <button onclick="toggleMusic()" class="absolute top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-xl">🎵</button>
+    
+    <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md">
+        <h1 class="text-3xl font-bold mb-4">Juego de Campeones</h1>
+        <p class="text-lg timer" id="timer">Tiempo: 60s</p>
+        <p class="text-lg" id="question">¿Cuánto es 2 × 3?</p>
+        <input type="number" id="answer" class="border-2 border-gray-300 rounded p-2 w-full text-center mt-4 text-xl" placeholder="Escribe tu respuesta...">
+        <button onclick="checkAnswer()" class="bg-blue-500 text-white px-4 py-2 rounded-xl mt-4 w-full text-lg">Comprobar</button>
+        <p id="feedback" class="mt-4 text-lg"></p>
+        <p class="mt-2 text-lg">Puntuación: <span id="score">0</span> | Errores: <span id="errors">0</span></p>
+        <button onclick="restartGame()" class="bg-red-500 text-white px-4 py-2 rounded-xl mt-4 w-full text-lg">Reiniciar</button>
+    </div>
+
+    <script>
+        let score = 0;
+        let errors = 0;
+        let num1, num2, correctAnswer;
+        let level = 1;
+        let timeLeft = 60;
+        let timerInterval;
+        let musicPlaying = false;
+        
+        function generateQuestion() {
+            let maxNum = level > 3 ? 99 : 9;
+            num1 = Math.floor(Math.random() * maxNum) + 1;
+            num2 = Math.floor(Math.random() * maxNum) + 1;
+            correctAnswer = num1 * num2;
+            document.getElementById("question").textContent = `¿Cuánto es ${num1} × ${num2}?`;
+            document.getElementById("answer").value = "";
+            document.getElementById("feedback").textContent = "";
+        }
+        
+        function checkAnswer() {
+            let userAnswer = parseInt(document.getElementById("answer").value);
+            let feedback = document.getElementById("feedback");
+            if (userAnswer === correctAnswer) {
+                feedback.innerHTML = "¡Correcto! 🎉😃";
+                feedback.className = "correct";
+                document.getElementById("correct-sound").play();
+                score++;
+                if (score % 5 === 0) level++;
+            } else {
+                feedback.innerHTML = `Incorrecto 😢❌ La respuesta era ${correctAnswer}`;
+                feedback.className = "incorrect";
+                document.getElementById("incorrect-sound").play();
+                errors++;
+            }
+            document.getElementById("score").textContent = score;
+            document.getElementById("errors").textContent = errors;
+            setTimeout(generateQuestion, 1000);
+        }
+        
+        function restartGame() {
+            score = 0;
+            errors = 0;
+            level = 1;
+            document.getElementById("score").textContent = score;
+            document.getElementById("errors").textContent = errors;
+            timeLeft = 60;
+            clearInterval(timerInterval);
+            startTimer();
+            generateQuestion();
+        }
+        
+        function startTimer() {
+            document.getElementById("timer").textContent = `Tiempo: ${timeLeft}s`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timer").textContent = `Tiempo: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("¡Se acabó el tiempo! Intenta de nuevo.");
+                    restartGame();
+                }
+            }, 1000);
+        }
+        
+        function toggleMusic() {
+            let music = document.getElementById("bg-music");
+            if (musicPlaying) {
+                music.pause();
+            } else {
+                music.play();
+            }
+            musicPlaying = !musicPlaying;
+        }
+        
+        generateQuestion();
+        startTimer();
+    </script>
+    
+    <!-- Instrucciones de uso:
+    1. Aparece una pregunta de multiplicación.
+    2. Ingresa tu respuesta en el campo de texto y presiona "Comprobar".
+    3. Si es correcta, se suma un punto; si es incorrecta, aparece un mensaje de error y la respuesta correcta.
+    4. La puntuación y los errores se muestran en tiempo real.
+    5. Puedes reiniciar el juego con el botón "Reiniciar".
+    6. Hay un temporizador de 60 segundos, si se acaba el tiempo, el juego reinicia.
+    7. La dificultad aumenta conforme aciertas respuestas.
+    8. Puedes activar o desactivar la música con el botón 🎵 en la esquina superior.
+    -->
+</body>
+</html>
